@@ -1,0 +1,41 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Persona Server</title>
+    <link rel="stylesheet" href="~/Account/StaticFiles/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/Account/StaticFiles/css/site.css" asp-append-version="true" />
+    <link href="~/Account/StaticFiles/css/mdb.dark.min.css" rel="stylesheet" />
+    <link href="~/Account/StaticFiles/css/mdb.min.css" rel="stylesheet" />
+    
+    <link
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+        rel="stylesheet"
+    />
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+        rel="stylesheet"
+    />
+
+    @await RenderSectionAsync("CSS",false)
+</head>
+<body>
+
+    <div class="container d-flex align-items-center justify-content-center">
+    @RenderBody()
+    </div>
+
+
+
+
+    <script src="~/Account/StaticFiles/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/Account/StaticFiles/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/Account/StaticFiles/js/site.js" asp-append-version="true"></script>
+    <script src="~/Account/StaticFiles/js/hmx.min.js" asp-append-version="true"></script>
+    <script src="~/Account/StaticFiles/js/chart.js"></script>
+    <script src="~/Account/StaticFiles/js/mdb.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
