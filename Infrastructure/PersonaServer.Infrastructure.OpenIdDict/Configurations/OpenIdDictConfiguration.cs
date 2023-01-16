@@ -25,12 +25,14 @@ public static class OpenIdDictConfiguration
                         .ReplaceDefaultEntities<ApplicationStore, AuthorizationStore, ScopeStore, TokenStore, Guid>();
                 });
 
+
             })
             .AddServer(options =>
             {
                 options
                     .AllowClientCredentialsFlow()
                     .AllowAuthorizationCodeFlow()
+                    .AllowHybridFlow()
                     .AllowRefreshTokenFlow();
 
                 options.SetAuthorizationEndpointUris("connect/authorize")
@@ -43,13 +45,21 @@ public static class OpenIdDictConfiguration
                     .AddEphemeralEncryptionKey()
                     .AddEphemeralSigningKey();
 
+                options.DisableAccessTokenEncryption();
+
+                
+
+                options.Configure(serverOptions =>
+                {
+                    serverOptions.ResponseTypes.Add(OpenIddictConstants.ResponseTypes.IdToken);
+                });
+
                 options.SetAccessTokenLifetime(TimeSpan.FromMinutes(30));
                 options.SetRefreshTokenLifetime(TimeSpan.FromDays(7));
 
                 // Register scopes (permissions)
-                options.RegisterScopes(OpenIddictConstants.Scopes.Email, OpenIddictConstants.Scopes.Profile, OpenIddictConstants.Scopes.Roles, OpenIddictConstants.Scopes.Phone);
-
-
+                options.RegisterScopes(OpenIddictConstants.Scopes.Email, OpenIddictConstants.Scopes.Profile, OpenIddictConstants.Scopes.Roles, OpenIddictConstants.Scopes.OpenId);
+                
                 // Register the ASP.NET Core host and configure the ASP.NET Core-specific options.
                 options.UseAspNetCore()
                     .EnableStatusCodePagesIntegration()
@@ -63,8 +73,7 @@ public static class OpenIdDictConfiguration
             {
                 // Import the configuration from the local OpenIddict server instance.
                  options.UseLocalServer();
-
-                // Register the ASP.NET Core host.
+                 // Register the ASP.NET Core host.
                 options.UseAspNetCore();
 
                 options.UseSystemNetHttp();

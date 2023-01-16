@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using OpenIddict.Abstractions;
-using PersonaServer.Stores.Sso;
 
 namespace PersonaServer.Infrastructure.OpenIdDict.Workers;
 
@@ -30,24 +29,30 @@ internal class AddTestDataWorker : BackgroundService
                 ClientSecret = "main-Api-Secret",
                 DisplayName = "Interaction With Main API",
                 Type = OpenIddictConstants.ClientTypes.Confidential,
-                RedirectUris = { new Uri("https://oauth.pstmn.io/v1/callback"), new Uri("https://localhost:5552"),new Uri("https://oidcdebugger.com/debug") },
-
+                RedirectUris = { new Uri("https://oauth.pstmn.io/v1/callback"), new Uri("https://localhost:5552"),new Uri("https://oidcdebugger.com/debug") , new Uri("https://localhost:7098/signin-oidc") },
                 Permissions =
                 {
                     OpenIddictConstants.Permissions.Endpoints.Authorization,
                     OpenIddictConstants.Permissions.Endpoints.Logout,
                     OpenIddictConstants.Permissions.Endpoints.Token,
+
                     OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,
                     OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
+                    OpenIddictConstants.Permissions.GrantTypes.Implicit,
+
+                    OpenIddictConstants.Permissions.ResponseTypes.IdToken,
                     OpenIddictConstants.Permissions.ResponseTypes.Code,
+
+                    OpenIddictConstants.Scopes.OpenId,
                     OpenIddictConstants.Permissions.Scopes.Email,
                     OpenIddictConstants.Permissions.Scopes.Profile,
-                    OpenIddictConstants.Permissions.Scopes.Roles
+                    OpenIddictConstants.Permissions.Scopes.Roles,
                 },
                 Requirements =
                 {
-                    OpenIddictConstants.Requirements.Features.ProofKeyForCodeExchange
-                }
+                    OpenIddictConstants.Requirements.Features.ProofKeyForCodeExchange,
+                },
+                PostLogoutRedirectUris = { new Uri("https://localhost:7098/signout-callback-oidc") }
             }, stoppingToken);
         }
     }
