@@ -4,9 +4,9 @@
     ViewData["Title"] = "Login";
     Layout = "_MvcLayout";
 }
-
 <!-- Pills navs -->
-<div class="col-md-8">
+<div class="col-4 m-5">
+<div class="card card-body">
     <ul class="nav nav-pills nav-justified mb-3" id="ex1" role="tablist">
         <li class="nav-item" role="presentation">
             <a class="nav-link active" id="tab-login" data-mdb-toggle="pill" href="#pills-login" role="tab"
@@ -48,14 +48,20 @@
                 <div class="form-outline mb-4">
                     <input type="email" id="loginName" asp-for="LoginViewModel.Email" class="form-control"/>
                     <label class="form-label" for="loginName">Email</label>
+                     
                 </div>
+                    
+                <span asp-validation-for="LoginViewModel!.Email" class="text-danger fw-bold"></span>
 
                 <!-- Password input -->
                 <div class="form-outline mb-4">
                     <input type="password" id="loginPassword" asp-for="LoginViewModel.Password" class="form-control"/>
                     <label class="form-label" for="loginPassword">Password</label>
+                       
                 </div>
-
+                    
+                    
+                <span asp-validation-for="LoginViewModel!.Password" class="text-danger fw-bold"></span>
                 <!-- 2 column grid layout -->
                 <div class="row mb-4">
                     <div class="col-md-6 d-flex justify-content-center">
@@ -110,7 +116,7 @@
                     <label class="form-label" for="registerName">Name</label>
                     <span asp-validation-for="RegisterViewModel!.Name" class="text-danger fw-bold"></span>
                 </div>
-                
+
                 <div class="form-outline mb-4">
                     <input type="text" id="familyName" asp-for="RegisterViewModel.Name" class="form-control"/>
                     <label class="form-label" for="familyName">Family Name</label>
@@ -139,16 +145,20 @@
                 </div>
 
                 <!-- Repeat Password input -->
-                <input type="hidden" asp-for="LoginViewModel.ReturnUrl" value="@(Model.RegisterViewModel?.ReturnUrl ?? Model.LoginViewModel.ReturnUrl)"/>
+                <input type="hidden" asp-for="RegisterViewModel.ReturnUrl" value="@(Model.RegisterViewModel?.ReturnUrl ?? Model.LoginViewModel?.ReturnUrl ?? "")"/>
                 <!-- Submit button -->
-                <button type="submit" class="btn btn-primary btn-block mb-3">Sign in and register!</button>
+                <button type="submit" class="btn btn-primary btn-block mb-3">Register!</button>
             </form>
         </div>
     </div>
 </div>
+</div>
+
 
 @section Scripts
     {
+    <script src="~/Account/StaticFiles/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/Account/StaticFiles/lib/jquery-validation/dist/additional-methods.min.js"></script>
     <script src="~/Account/StaticFiles/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
 }
 

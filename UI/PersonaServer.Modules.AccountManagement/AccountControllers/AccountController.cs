@@ -1,7 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Text;
+using System.Text.Encodings.Web;
+using System.Web;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using PersonaServer.Infrastructure.Identity.Identity.Manager;
 using PersonaServer.Modules.AccountManagement.Models;
 using PersonaServer.Stores.Identity;
+using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 namespace PersonaServer.Modules.AccountManagement.AccountControllers;
 
@@ -11,11 +16,13 @@ public class AccountController : Controller
 {
     private readonly AppUserManager _userManager;
     private readonly AppSignInManager _signInManager;
+    private readonly ILogger<AccountController> _logger;
 
-    public AccountController(AppUserManager userManager, AppSignInManager signInManager)
+    public AccountController(AppUserManager userManager, AppSignInManager signInManager, ILogger<AccountController> logger)
     {
         _userManager = userManager;
         _signInManager = signInManager;
+        _logger = logger;
     }
 
     public IActionResult Login([FromQuery(Name = "ReturnUrl")] string returnUrl="")
@@ -50,12 +57,29 @@ public class AccountController : Controller
             return View(model);
         }
 
+        if (!await _userManager.CheckPasswordAsync(user, model.LoginViewModel.Password))
+        {
+            ModelState.AddModelError(string.Empty, "Password is not correct");
+            return View(model);
+        }
+
+        if (!await _userManager.IsEmailConfirmedAsync(user))
+        {
+            var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+
+            var url = Url.Action("ConfirmEmail", new { userId = user.Id, confirmToken = emailConfirmationToken });
+
+            _logger.LogWarning("Email Confirmation Url is {0}",url);
+
+            return RedirectToAction("ConfirmEmailRequired");
+        }
+
         var signInResult = await _signInManager.PasswordSignInAsync(user, model.LoginViewModel.Password, model.LoginViewModel.RememberMe, true);
 
         if (signInResult.Succeeded)
             return Redirect(model.LoginViewModel.ReturnUrl);
 
-        ModelState.AddModelError(string.Empty, "Your Account Is Disabled. Contact Administrator");
+        ModelState.AddModelError(string.Empty, signInResult.ToString());
         return View(model);
     }
 
@@ -85,28 +109,49 @@ public class AccountController : Controller
         {
             Email = model.RegisterViewModel.Email,
             UserName = model.RegisterViewModel.UserName,
-            EmailConfirmed = true,
-            PhoneNumberConfirmed = true,
             Name = model.RegisterViewModel.Name,
             FamilyName = model.RegisterViewModel.FamilyName
         };
 
         var newUser = await _userManager.CreateAsync(user, model.RegisterViewModel.Password);
 
-        if (newUser.Succeeded)
+        if (!await _userManager.IsEmailConfirmedAsync(user))
         {
-            var signInResult =
-                await _signInManager.PasswordSignInAsync(user, model.RegisterViewModel.Password, false, true);
+            var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
-            if (signInResult.Succeeded)
-                return Redirect(model.RegisterViewModel.ReturnUrl??"/");
+            var url = Url.Action("ConfirmEmail", new { userId = user.Id, confirmToken = emailConfirmationToken });
 
-            ModelState.AddModelError(string.Empty, "Your Account Is Disabled. Contact Administrator");
-            return View("Login", model);
+                _logger.LogWarning("Email Confirmation Url is {0}", url);
+
+            return RedirectToAction("ConfirmEmailRequired");
         }
 
         ModelState.AddModelError(string.Empty, string.Join("\n", newUser.Errors.Select(c => c.Description)));
 
         return View("Login", model);
+    }
+
+    public IActionResult ConfirmEmailRequired()
+    {
+        return View();
+    }
+
+    public async Task<IActionResult> ConfirmEmail(Guid userId, string confirmToken)
+    {
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+
+        if (user == null)
+            return View(new EmailConfirmationViewModel(false, "User Not Found"));
+
+        if (user.EmailConfirmed)
+            return View(new EmailConfirmationViewModel(false, "This Email is Already Confirmed"));
+
+        var confirmEmailResult = await _userManager.ConfirmEmailAsync(user, confirmToken);
+
+        if (confirmEmailResult.Succeeded)
+            return View(new EmailConfirmationViewModel(true, "Your Email Confirmed Successfully"));
+
+        return View(new EmailConfirmationViewModel(false,
+            string.Join("\n", confirmEmailResult.Errors.Select(c => c.Description))));
     }
 }

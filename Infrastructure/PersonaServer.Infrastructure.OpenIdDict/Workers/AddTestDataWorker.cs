@@ -36,17 +36,17 @@ internal class AddTestDataWorker : BackgroundService
                     OpenIddictConstants.Permissions.Endpoints.Logout,
                     OpenIddictConstants.Permissions.Endpoints.Token,
 
-                    OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,
-                    OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
-                    OpenIddictConstants.Permissions.GrantTypes.Implicit,
+                    OpenIddictConstants.GrantTypes.AuthorizationCode,
+                    OpenIddictConstants.GrantTypes.RefreshToken,
+                    OpenIddictConstants.GrantTypes.Implicit,
 
-                    OpenIddictConstants.Permissions.ResponseTypes.IdToken,
-                    OpenIddictConstants.Permissions.ResponseTypes.Code,
+                    OpenIddictConstants.ResponseTypes.IdToken,
+                    OpenIddictConstants.ResponseTypes.Code,
 
                     OpenIddictConstants.Scopes.OpenId,
-                    OpenIddictConstants.Permissions.Scopes.Email,
-                    OpenIddictConstants.Permissions.Scopes.Profile,
-                    OpenIddictConstants.Permissions.Scopes.Roles,
+                    OpenIddictConstants.Scopes.Email,
+                    OpenIddictConstants.Scopes.Profile,
+                    OpenIddictConstants.Scopes.Roles,
                 },
                 Requirements =
                 {

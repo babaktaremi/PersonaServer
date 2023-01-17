@@ -1,0 +1,26 @@
+﻿@model PersonaServer.Modules.AccountManagement.Models.EmailConfirmationViewModel
+
+@{
+    ViewData["Title"] = "Email Confirmation";
+    Layout = "_MvcLayout";
+}
+
+
+<!-- Pills navs -->
+<div class="col-6 m-5">
+<div class="card card-body">
+
+    <!-- Pills navs -->
+    <!-- Pills content -->
+    <div class="tab-content">
+
+        <div class="tab-pane fade show active" id="pills-login" role="tabpanel" aria-labelledby="tab-login">
+            <div class="text-center mb-3">
+                <p class="text-bold  @(Model.IsSuccess? "text-success": "text-danger")">@Model.Message</p>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+</div>

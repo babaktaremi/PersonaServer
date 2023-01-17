@@ -1,26 +1,50 @@
 ﻿@using Microsoft.Extensions.Primitives
 @using Microsoft.AspNetCore.Mvc.TagHelpers
+@using PersonaServer.Modules.AccountManagement.Models
 @model PersonaServer.Modules.AccountManagement.Models.AuthorizeViewModel
 
 @{
     ViewData["Title"] = "Attention Required";
     Layout = "_MvcLayout";
+    var requestedScopes = Model.Scope.Split(" ");
+
 }
 
-<div class="jumbotron">
+<div class="col-6 m-5">
+<div class="card card-body">
+
+<!-- Pills navs -->
+<!-- Pills content -->
+<div class="tab-content">
     <h1>Authorization</h1>
 
-    <p class="lead text-left">Do you want to grant <strong>@Model.ApplicationName</strong> access to your data? (scopes requested: @Model.Scope)</p>
+    <p class="lead text-left">Do you want to grant <strong>@Model.ApplicationName</strong> access to your data?</p>
+    
+ 
 
     <form asp-controller="Authorization" asp-action="Authorize" method="post">
+        @foreach (var item in requestedScopes)
+        {
+            <div class="form-check">
+
+                <input name="SelectedScopes" type="checkbox" class="form-check-input" id="@item" value="@item" @(item.Equals("openid")?" checked=\"checked\"":"") />
+                <label class="form-check-label" for="@item">
+                    @item
+                </label>
+            </div>
+        }
         @* Flow the request parameters so they can be received by the Accept/Reject actions: *@
         @foreach (var parameter in Context.Request.HasFormContentType ?
-        (IEnumerable<KeyValuePair<string, StringValues>>)Context.Request.Form : Context.Request.Query)
+            (IEnumerable<KeyValuePair<string, StringValues>>)Context.Request.Form : Context.Request.Query)
         {
-            <input type="hidden" name="@parameter.Key" value="@parameter.Value" />
+            <input type="hidden" name="@parameter.Key" value="@parameter.Value"/>
         }
 
-        <input class="btn btn-lg btn-success" name="submit.Accept" type="submit" value="Yes" />
-        <input class="btn btn-lg btn-danger" name="submit.Deny" type="submit" value="No" />
+        <div class="text-center">
+            <input class="btn btn-lg btn-success" name="submit.Accept" type="submit" value="Yes"/>
+            <input class="btn btn-lg btn-danger" name="submit.Deny" type="submit" value="No"/>
+        </div>
     </form>
+</div>
+    </div>
 </div>

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 
@@ -10,7 +11,14 @@ public static class PersonaServerAccountModuleConfiguration
 {
     public static IServiceCollection AddAccountModuleServices(this IServiceCollection services)
     {
-        services.AddControllersWithViews();
+        services
+            .AddControllersWithViews()
+            .AddRazorRuntimeCompilation();
+
+        services.Configure<MvcRazorRuntimeCompilationOptions>(options =>
+        {
+            options.FileProviders.Add(new PhysicalFileProvider(Path.Combine(Path.GetDirectoryName(Environment.CurrentDirectory)!, "PersonaServer.Modules.AccountManagement")));
+        });
 
         services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
             .AddCookie(options =>

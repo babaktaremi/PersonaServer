@@ -9,7 +9,7 @@ public class AppErrorDescriber:IdentityErrorDescriber
         return new IdentityError
         {
             Code = "DefaultError",
-            Description = "خطایی رخ داده است"
+            Description = "There was a problem. Try again"
         };
     }
 
@@ -18,7 +18,7 @@ public class AppErrorDescriber:IdentityErrorDescriber
         return new IdentityError
         {
             Code = nameof(DuplicateEmail),
-            Description = "ایمیل وارد شده تکراری است"
+            Description = "This email already exists. Login or use another email"
         };
     }
 
@@ -27,7 +27,7 @@ public class AppErrorDescriber:IdentityErrorDescriber
         return new IdentityError
         {
             Code = nameof(DuplicateUserName),
-            Description = "نام کاربری وارد شده تکراری است"
+            Description = "this username already exists. Login or use another email"
         };
     }
 
@@ -36,7 +36,7 @@ public class AppErrorDescriber:IdentityErrorDescriber
         return new IdentityError
         {
             Code = nameof(PasswordMismatch),
-            Description = "پسوورد وارد شده صحیح نیست"
+            Description = "Password is not correct. Please try again"
         };
     }
 
@@ -45,7 +45,7 @@ public class AppErrorDescriber:IdentityErrorDescriber
         return new IdentityError
         {
             Code = nameof(PasswordTooShort),
-            Description = "پسوورد کوتاه است"
+            Description = "Password is too short. Try another password"
         };
     }
 
@@ -54,7 +54,7 @@ public class AppErrorDescriber:IdentityErrorDescriber
         return new IdentityError
         {
             Code = nameof(InvalidUserName),
-            Description = "نام کاربری نامعتبر است"
+            Description = "Username not valid. Try another username"
         };
     }
 
@@ -63,7 +63,7 @@ public class AppErrorDescriber:IdentityErrorDescriber
         return new IdentityError
         {
             Code = nameof(InvalidEmail),
-            Description = "ایمیل وارد شده نامعتبر است"
+            Description = "Email is not valid. Please use a valid email"
         };
     }
 
@@ -73,8 +73,9 @@ public class AppErrorDescriber:IdentityErrorDescriber
         return new IdentityError
         {
             Code = nameof(InvalidToken),
-            Description = "کد وارد شده معتبر نیست"
+            Description = "Code is incorrect. Please try again"
         };
     }
+
 
 }

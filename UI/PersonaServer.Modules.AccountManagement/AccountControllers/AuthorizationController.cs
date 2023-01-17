@@ -177,7 +177,7 @@ public class AuthorizationController : Controller
 
     [Authorize, FormValueRequired("submit.Accept")]
     [HttpPost("~/connect/authorize"), ValidateAntiForgeryToken]
-    public async Task<IActionResult> Accept()
+    public async Task<IActionResult> Accept(AuthorizeViewModel authorizationAcceptedModel)
     {
         var request = HttpContext.GetOpenIddictServerRequest() ??
                       throw new InvalidOperationException("The OpenID Connect request cannot be retrieved.");
@@ -225,10 +225,11 @@ public class AuthorizationController : Controller
             .SetClaim(OpenIddictConstants.Claims.Name, await _userManager.GetUserNameAsync(user))
             .SetClaims(OpenIddictConstants.Claims.Role, (await _userManager.GetRolesAsync(user)).ToImmutableArray());
 
-        // Note: in this sample, the granted scopes match the requested scope
-        // but you may want to allow the user to uncheck specific scopes.
-        // For that, simply restrict the list of scopes before calling SetScopes.
-        identity.SetScopes(request.GetScopes());
+
+        var allowedScopes = request.GetScopes().AsEnumerable()
+            .Where(authorizationAcceptedModel.SelectedScopes.Contains).ToImmutableArray();
+
+        identity.SetScopes(allowedScopes);
         identity.SetResources(await _scopeManager.ListResourcesAsync(identity.GetScopes()).ToListAsync());
 
         // Automatically create a permanent authorization to avoid requiring explicit consent
