@@ -232,18 +232,22 @@ public class AuthorizationController : Controller
         identity.SetScopes(allowedScopes);
         identity.SetResources(await _scopeManager.ListResourcesAsync(identity.GetScopes()).ToListAsync());
 
-        // Automatically create a permanent authorization to avoid requiring explicit consent
-        // for future authorization or token requests containing the same scopes.
-        var authorization = authorizations.LastOrDefault();
-        authorization ??= await _authorizationManager.CreateAsync(
-            identity: identity,
-            subject: await _userManager.GetUserIdAsync(user),
-            client: await _applicationManager.GetIdAsync(application),
-            type: OpenIddictConstants.AuthorizationTypes.Permanent,
-            scopes: identity.GetScopes());
+        if (authorizationAcceptedModel.SelectedConsentType == AuthorizeViewModel.ConsentType.Permanent)
+        {
+            // Automatically create a permanent authorization to avoid requiring explicit consent
+            // for future authorization or token requests containing the same scopes.
 
-        identity.SetAuthorizationId(await _authorizationManager.GetIdAsync(authorization));
-        identity.SetDestinations(GetDestinations);
+            var authorization = authorizations.LastOrDefault();
+            authorization ??= await _authorizationManager.CreateAsync(
+                identity: identity,
+                subject: await _userManager.GetUserIdAsync(user),
+                client: await _applicationManager.GetIdAsync(application),
+                type: OpenIddictConstants.AuthorizationTypes.Permanent,
+                scopes: identity.GetScopes());
+
+            identity.SetAuthorizationId(await _authorizationManager.GetIdAsync(authorization));
+            identity.SetDestinations(GetDestinations);
+        }
 
         // Returning a SignInResult will ask OpenIddict to issue the appropriate access/identity tokens.
         return SignIn(new ClaimsPrincipal(identity), OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);

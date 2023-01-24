@@ -33,6 +33,13 @@
                 </label>
             </div>
         }
+        <div class="form-group m-2">
+                    <label class="form-label text-bold" for="consentType">Consent Type</label>
+            <select class="form-select" id="consentType" lab asp-for="SelectedConsentType" asp-items="Html.GetEnumSelectList<AuthorizeViewModel.ConsentType>()" aria-label="Default select example">
+                <option selected value="">Please select consent type</option>
+            </select>
+        </div>
+
         @* Flow the request parameters so they can be received by the Accept/Reject actions: *@
         @foreach (var parameter in Context.Request.HasFormContentType ?
             (IEnumerable<KeyValuePair<string, StringValues>>)Context.Request.Form : Context.Request.Query)

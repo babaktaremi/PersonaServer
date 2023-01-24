@@ -16,4 +16,13 @@ public class AuthorizeViewModel
     public string Scope { get; set; }
 
     public List<string> SelectedScopes { get; set; }
+
+    [Required(ErrorMessage = "Please specify the consent type")]
+    public ConsentType SelectedConsentType { get; set; }
+
+   public enum ConsentType
+    {
+        Permanent,
+        JustThisType
+    }
 }
