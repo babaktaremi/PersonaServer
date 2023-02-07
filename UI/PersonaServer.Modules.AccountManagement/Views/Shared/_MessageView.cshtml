@@ -1,0 +1,32 @@
+﻿@using PersonaServer.Modules.AccountManagement.Models
+@model PersonaServer.Modules.AccountManagement.Models.ShowMessageViewModel
+
+@{
+    ViewData["Title"] = "Your Request";
+    Layout = "_MvcLayout";
+    var cssClass = Model.RelatedMessageType switch
+        {
+        ShowMessageViewModel.MessageType.Success => "text-success",
+        ShowMessageViewModel.MessageType.Warning=>"text-warning",
+        ShowMessageViewModel.MessageType.Error=>"text-danger",
+        _ => ""
+        };
+}
+
+<div class="col-6 m-5">
+    <div class="card card-body">
+
+        <!-- Pills navs -->
+        <!-- Pills content -->
+        <div class="tab-content">
+
+            <div class="tab-pane fade show active" id="pills-login" role="tabpanel" aria-labelledby="tab-login">
+                <div class="text-center mb-3">
+                    <p class="text-bold  @cssClass">@Model.Message</p>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

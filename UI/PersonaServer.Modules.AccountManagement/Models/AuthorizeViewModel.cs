@@ -22,7 +22,10 @@ public class AuthorizeViewModel
 
    public enum ConsentType
     {
+        [Display(Name = "Always Allow")]
         Permanent,
+
+        [Display(Name = "Just this time")]
         JustThisType
     }
 }

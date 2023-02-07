@@ -1,12 +1,14 @@
-﻿using System.Text;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Text;
 using System.Text.Encodings.Web;
 using System.Web;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using PersonaServer.Infrastructure.Identity.Identity.Manager;
+using PersonaServer.Modules.AccountManagement.Helpers;
 using PersonaServer.Modules.AccountManagement.Models;
 using PersonaServer.Stores.Identity;
-using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 namespace PersonaServer.Modules.AccountManagement.AccountControllers;
 
@@ -29,7 +31,7 @@ public class AccountController : Controller
     {
         if (User.Identity is { IsAuthenticated: true })
         {
-            if (Url.IsLocalUrl(returnUrl))
+            if (Url.IsLocalUrl(returnUrl) && !string.IsNullOrEmpty(returnUrl))
             {
                 return Redirect(returnUrl);
             }
@@ -97,13 +99,13 @@ public class AccountController : Controller
         if (!ModelState.IsValid && model.LoginViewModel is null)
             return View("Login", model);
 
-        var checkUser = await _userManager.FindByEmailAsync(model.RegisterViewModel.Email);
+        //var checkUser = await _userManager.FindByEmailAsync(model.RegisterViewModel.Email);
 
-        if (checkUser is not null)
-        {
-            ModelState.AddModelError(string.Empty, "User Already Exists. Please Login");
-            return View("Login", model);
-        }
+        //if (checkUser is not null)
+        //{
+        //    ModelState.AddModelError(string.Empty, "User Already Exists. Please Login");
+        //    return View("Login", model);
+        //}
 
         var user = new User()
         {
@@ -114,6 +116,16 @@ public class AccountController : Controller
         };
 
         var newUser = await _userManager.CreateAsync(user, model.RegisterViewModel.Password);
+
+        if (!newUser.Succeeded)
+        {
+            foreach (var identityError in newUser.Errors)
+            {
+                ModelState.AddModelError(string.Empty,identityError.Description);
+            }
+
+            return View("Login",model);
+        }
 
         if (!await _userManager.IsEmailConfirmedAsync(user))
         {
@@ -153,5 +165,82 @@ public class AccountController : Controller
 
         return View(new EmailConfirmationViewModel(false,
             string.Join("\n", confirmEmailResult.Errors.Select(c => c.Description))));
+    }
+
+    public IActionResult ForgotPassword() => View();
+
+    [HttpPost]
+    public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
+    {
+        if (!ModelState.IsValid)
+            return View(model);
+
+        var user = new EmailAddressAttribute().IsValid(model.UserNameOrEmail)
+            ? await _userManager.FindByEmailAsync(model.UserNameOrEmail): await _userManager.FindByNameAsync(model.UserNameOrEmail);
+
+        if (user == null)
+        {
+            ModelState.AddModelError(string.Empty,"User not found");
+            return View(model);
+        }
+
+        var forgotPasswordToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+        var url = Url.Action("ResetPassword", new { userId = user.Id, forgotPasswordToken = forgotPasswordToken });
+
+        _logger.LogWarning("Email Confirmation Url is {0}", url);
+
+        return View("_MessageView",
+            new ShowMessageViewModel(ShowMessageViewModel.MessageType.Success,
+                $"A link to reset your password sent to email {user.Email.MaskEmail()}"));
+    }
+
+    public async Task<IActionResult> ResetPassword(Guid userId, string forgotPasswordToken)
+    {
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+
+        if (user == null)
+            return NotFound();
+
+        var changePasswordVerificationToken = await _userManager.VerifyUserTokenAsync(user,
+            _userManager.Options.Tokens.ChangeEmailTokenProvider, "ResetPassword", forgotPasswordToken);
+
+
+        if (!changePasswordVerificationToken)
+            return NotFound();
+
+
+        return View(new ChangePasswordViewModel(user.Id, forgotPasswordToken));
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ResetPassword(ChangePasswordViewModel model)
+    {
+        var user = await _userManager.FindByIdAsync(model.UserId.ToString());
+
+        if (user == null)
+            return NotFound();
+
+        if (!ModelState.IsValid)
+            return View(model);
+
+        var changePasswordResult =
+            await _userManager.ResetPasswordAsync(user, model.ChangePasswordToken, model.NewPassword);
+
+        if (changePasswordResult.Succeeded)
+        {
+            await _userManager.UpdateSecurityStampAsync(user);
+
+            return View("_MessageView",
+                new ShowMessageViewModel(ShowMessageViewModel.MessageType.Success,
+                    "Your password changed successfully. you can now login"));
+        }
+
+        foreach (var identityError in changePasswordResult.Errors)
+        {
+            ModelState.AddModelError(string.Empty,identityError.Description);
+        }
+
+        return View(model);
     }
 }
